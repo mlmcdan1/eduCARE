@@ -7,7 +7,6 @@ export default function Header() {
 
     //fast routing from react
     const navigate = useNavigate()
-    console.log(location)
 
     function pathMathRoute(route){
         if(route === location.pathname){
