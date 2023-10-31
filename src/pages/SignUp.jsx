@@ -14,22 +14,22 @@ export default function SignUp() {
     name:"",
     email:"",
     password:"",
-  })
+  });
   const {name, email, password} = formData;
   const navigate = useNavigate();
   function onChange(e){
     setFormData((prevState) =>({
       ...prevState,
       [e.target.id]: e.target.value,
-    }))
+    }));
   }
 
   async function onSubmit(e) {
     e.preventDefault();
-
     try {
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(
+      const userCredential = await 
+      createUserWithEmailAndPassword(
         auth,
         email,
         password
@@ -42,11 +42,12 @@ export default function SignUp() {
       const formDataCopy = { ...formData };
       delete formDataCopy.password;
       formDataCopy.timestamp = serverTimestamp();
-
+      //console.log(user);
       await setDoc(doc(db, "users", user.uid), formDataCopy);
        toast.success("Sign up was successful");
        navigate("/");
-    } catch (error) {
+    } 
+    catch (error) {
       toast.error("Something went wrong with the registration");
     }
   }
@@ -99,7 +100,7 @@ export default function SignUp() {
                     </Link>
               </p>
             </div>
-            <button type='submit' 
+            <button type="submit"
               className='w-full bg-blue-600 text-white 
               px-7 py-3 text-sm font-medium uppercase rounded
               shadow-md hover:bg-blue-700 transition duration-150
