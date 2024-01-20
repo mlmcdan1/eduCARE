@@ -22,10 +22,17 @@ export default function OAuth() {
       const docRef = doc(db, "users", user.uid)
       const docSnap = await getDoc(docRef)
 
+      //check if the user has the 'admin' role
+      const isAdmin = docSnap.exists() && docSnap.data().roles.includes('admin');
+      if (isAdmin) {
+        Navigate("/business-login")
+      }
+
       if(!docSnap.exists()){
         await setDoc(docRef, {
           name: user.displayName,
           email: user.email,
+          roles: ['user'],
           timestamp: serverTimestamp(),
         })
       }

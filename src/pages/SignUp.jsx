@@ -1,12 +1,27 @@
 import React, { useState } from 'react'
 import {AiFillEyeInvisible, AiFillEye} from "react-icons/ai"
 import { Link } from 'react-router-dom';
-import {getAuth, createUserWithEmailAndPassword, updateProfile} from "firebase/auth"
+import {getAuth, createUserWithEmailAndPassword, updateProfile, } from "firebase/auth"
 import OAuth from './components/OAuth';
 import {db} from "../firebase"
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Checkbox from '@mui/material/Checkbox';
+
+
+async function setCustomUserClaims(userId, claims){
+  try{
+  // Set custom claims
+  await setDoc(doc(db, "customClaims", userId), {
+    ...claims,
+    timestamp: serverTimestamp(),
+  });
+} catch (error){
+  console.error("Error setting custom claims:", error);
+  throw error;
+}
+}
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,12 +32,12 @@ export default function SignUp() {
   });
   const {name, email, password} = formData;
   const navigate = useNavigate();
-  function onChange(e){
-    setFormData((prevState) =>({
-      ...prevState,
-      [e.target.id]: e.target.value,
-    }));
-  }
+
+  const [checked, setChecked] = useState(false);
+
+  const handleChange = (event) => {
+    setChecked((prevChecked) => !prevChecked);
+  };
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -35,22 +50,53 @@ export default function SignUp() {
         password
       );
 
-      updateProfile(auth.currentUser, {
+      const user = userCredential.user;
+
+      //set the user's display name
+      await updateProfile(auth.currentUser, {
         displayName: name,
       });
-      const user = userCredential.user;
+
+      //set the custom claim indicating whether the user wants to create a business page
+
       const formDataCopy = { ...formData };
       delete formDataCopy.password;
       formDataCopy.timestamp = serverTimestamp();
+
       //console.log(user);
       await setDoc(doc(db, "users", user.uid), formDataCopy);
+
+      //Set custom claim only if the box is checked
+       if (checked) {
+        await setCustomUserClaims(user.uid, {isBusinessUser: true});
+       }
+
+       const idTokenResult = await user.getIdTokenResult();
+       console.log("User Claims:", idTokenResult.claims);
+
        toast.success("Sign up was successful");
-       navigate("/");
+
+       //Navigate after setting the custom claim
+       if (checked){
+        navigate("/business-login")
+        } 
+        else {
+        navigate("/")
+      }
     } 
     catch (error) {
+      console.error("Error during sign up:", error);
       toast.error("Something went wrong with the registration");
     }
   }
+
+  function onChange(e){
+    setFormData((prevState) =>({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  }
+
   return (
     <section>
       <h1 className='text-3xl text-center mt-6 font-bold '>
@@ -80,6 +126,15 @@ export default function SignUp() {
                   top-3 text-xl cursor-pointer'
                   onClick={()=> setShowPassword
                   ((prevState)=>!prevState)}/>)}
+            </div>
+            <div className='mb-6'>
+              <p>Check the box if you're registering for business page: </p>
+              <Checkbox
+                checked={checked}
+                onChange={handleChange}
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+              Business
             </div>
             <div className='flex justify-between 
             whitespace-nowrap text-sm sm:text-lg'>

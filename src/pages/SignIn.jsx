@@ -28,7 +28,18 @@ export default function SignIn() {
     try {
       const auth = getAuth()
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      if(userCredential.user){
+
+      if(userCredential.user) {
+        //Check if the user has the isBusinessUser claim
+        const idTokenResult = await userCredential.user.getIdTokenResult();
+        const isBusinessUser = idTokenResult.claims.isBusinessUser;
+
+        if (isBusinessUser){
+          console.log('Business user!');
+        } else {
+          console.log('Regular user.');
+        }
+
         navigate("/")
       }
     } catch (error) {

@@ -42,6 +42,8 @@ export default function Header() {
                     <li className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent
                     ${(pathMatchRoute("/profile") || pathMatchRoute("/profile")) && "text-black border-b-red-500"}`} 
                     onClick={()=> navigate("/profile")}>{pageState }</li>
+                    <li className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent
+                    ${pathMatchRoute("/business-login") && "text-black border-b-red-500"}`} onClick={()=> navigate("/business-login")}>Business</li>
 
                 </ul>
             </div>
